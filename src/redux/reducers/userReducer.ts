@@ -1,16 +1,28 @@
-import { UserActionTypes, UPDATE_FIRST_NAME, UPDATE_LAST_NAME, RESET_FORM,SET_GENDER} from '../actions/userActions';
+import {
+  UserActionTypes, UPDATE_FIRST_NAME, UPDATE_LAST_NAME, UPDATE_EMAIL,UPDATE_ADDRESS, RESET_FORM, SET_GENDER, SUBMIT_FORM
+} from '../actions/userActions';
 
 interface UserState {
   firstName: string;
   lastName: string;
+  email:string;
+  address:string;
+
+  
   gender: 'Male' | 'Female';
+  isSubmitted: boolean;
+
 }
 
 
 const initialState: UserState = {
   firstName: '',
   lastName: '',
-  gender: 'Male'
+  email: '',
+  address: '',
+  gender: 'Male',
+  isSubmitted: false,
+
 };
 
 const userReducer = (state = initialState, action: UserActionTypes): UserState => {
@@ -19,11 +31,22 @@ const userReducer = (state = initialState, action: UserActionTypes): UserState =
       return { ...state, firstName: action.payload };
     case UPDATE_LAST_NAME:
       return { ...state, lastName: action.payload };
-      case SET_GENDER:
+
+      case UPDATE_EMAIL:
+      return { ...state, email: action.payload };
+    case UPDATE_ADDRESS:
+      return { ...state, address: action.payload };
+    case SET_GENDER:
       return { ...state, gender: action.payload };
 
+    case SUBMIT_FORM:
+      return { ...state, isSubmitted: true };
+
     case RESET_FORM:
-      return initialState; // Reset to initial state
+      return initialState;
+
+
+
     default:
       return state;
   }
