@@ -1,92 +1,113 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { updateFirstName, updateLastName,updateEmail, updateAddress, setGender, resetForm, submitForm } from '../redux/actions/userActions';
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { useNavigate } from 'react-router-dom';
+import  useTypedDispatch  from '../hooks/useTypedDispatch'; 
+import { setUserDetails } from '../redux/actions/userActions'; 
 
 const UserForm: React.FC = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user);
+  const navigate = useNavigate();
+  const dispatch = useTypedDispatch(); 
+  const validationSchema = Yup.object({
+    firstName: Yup.string().required('First Name is required'),
+    lastName: Yup.string().required('Last Name is required'),
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    gender: Yup.string().required('Gender is required'),
+  });
 
-  if (!user) {
-    console.error("User state is undefined");
-    return null;
-  }
+  const initialValues = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    gender: '',
+  };
 
-  const { firstName, lastName, email, address, gender, isSubmitted } = user;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-    dispatch(submitForm());
+  const onSubmit = (values: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: string;
+  }) => {
+    dispatch(setUserDetails(values));
+    navigate('/user-details');
   };
 
   return (
-    <div className='p-4'>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => dispatch(updateFirstName(e.target.value))}
-            placeholder="First Name"
-            className='text-green-700 h-10 w-36 mt-7 border-[3px] border-amber-500'
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => dispatch(updateLastName(e.target.value))}
-            placeholder="Last Name"
-            className='text-green-700 h-10 w-36 mt-5 border-[3px] border-amber-500'
-          />
-        </div>
-        <div>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => dispatch(updateEmail(e.target.value))}
-            placeholder="email"
-            className='text-green-700 h-10 w-36 mt-7 border-[3px] border-amber-500'
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => dispatch(updateAddress(e.target.value))}
-            placeholder="Address"
-            className='text-green-700 h-10 w-36 mt-7 border-[3px] border-amber-500'
-          />
-        </div>
-        <div>
-          <label>Gender:</label>
-          <select
-            value={gender}
-            onChange={(e) => dispatch(setGender(e.target.value as 'Male' | 'Female'))}
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </div>
-        <button type="submit" className='mt-4 bg-blue-500 text-white px-4 py-2 rounded'>
-          Submit
-        </button>
-        <button type="button" onClick={() => dispatch(resetForm())} className='ml-4 bg-red-500 text-white px-4 py-2 rounded'>
-          Reset Form
-        </button>
-      </form>
-
-      {isSubmitted && (
-        <div className='mt-10 p-5 border-[3px] border-green-500'>
-          <h2 className='font-bold'>Submitted User Details:</h2>
-          <p>First Name: {firstName}</p>
-          <p>Last Name: {lastName}</p>
-          <p>First Name: {email}</p>
-          <p>Last Name: {address}</p>
-          <p>Gender: {gender}</p>
-        </div>
-      )}
+    <div className="max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">User Form</h2>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={onSubmit}
+      >
+        <Form>
+          <div>
+            <label className="block text-gray-600 font-semibold">First Name</label>
+            <Field
+              name="firstName"
+              type="text"
+              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+            />
+            <ErrorMessage name="firstName" component="div" className="text-red-600 text-sm" />
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold">Last Name</label>
+            <Field
+              name="lastName"
+              type="text"
+              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+            />
+            <ErrorMessage name="lastName" component="div" className="text-red-600 text-sm" />
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold">Email</label>
+            <Field
+              name="email"
+              type="email"
+              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+            />
+            <ErrorMessage name="email" component="div" className="text-red-600 text-sm" />
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold">Gender</label>
+            <div className="mt-2">
+              <label className="inline-flex items-center">
+                <Field
+                  name="gender"
+                  type="radio"
+                  value="Male"
+                  className="form-radio"
+                />
+                <span className="ml-2">Male</span>
+              </label>
+              <label className="inline-flex items-center ml-6">
+                <Field
+                  name="gender"
+                  type="radio"
+                  value="Female"
+                  className="form-radio"
+                />
+                <span className="ml-2">Female</span>
+              </label>
+              <label className="inline-flex items-center ml-6">
+                <Field
+                  name="gender"
+                  type="radio"
+                  value="Other"
+                  className="form-radio"
+                />
+                <span className="ml-2">Other</span>
+              </label>
+            </div>
+            <ErrorMessage name="gender" component="div" className="text-red-600 text-sm" />
+          </div>
+          <div className="mt-4">
+            <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
+              Submit
+            </button>
+          </div>
+        </Form>
+      </Formik>
     </div>
   );
 };
